@@ -257,20 +257,72 @@ rm(HIES_2000, HIES_2005, HIES_2010, HIES_2016, price_2000, price_2005, price_201
 
 Nutrition_2016 <- temp_2016[,c("hhold", "hilsa", "rohu/katla/mrigel/kali_baush", "koi",
                                "silver_carp/grass_carp/miror_carp", "puti/big_puti/tilapia", 
-                               "shrimp")]
+                               "shrimp", "total_expenditure_peryear")]
 
 Nutrition_2010 <- temp_2010[,c("hhold", "hilsa", "rohu/katal/mrigel/kali_baush", "koi",
                                "silver_carp/grass_carp/miror_carp", "puti/big_puti/tilapia", 
-                               "shrimp")]
+                               "shrimp", "total_expenditure_peryear")]
 
 Nutrition_2005 <- temp_2005[,c("hhold", "hilsa", "rohu/katal/mrigel/kali_baush", "koi",
                                "silver_carp/grass_carp/miror_carp", "puti/big_puti/tilapia", 
-                               "shrimp")]
+                               "shrimp", "total_expenditure_peryear")]
 
 Nutrition_2000 <- temp_2000[,c("hhold", "hilsa", "rohu/katal/mrigel/kali_baush", "koi",
                                "silver_carp/grass_carp/miror_carp", "puti/big_puti/tilapia", 
-                               "shrimp")]
+                               "shrimp", "total_expenditure_peryear")]
 ```
+
+
+## Saperating into quantile
+
+```{r}
+quantile(Nutrition_2016$total_expenditure_peryear)
+Nutrition_2016 <- Nutrition_2016 %>% mutate(quantile=case_when(total_expenditure_peryear <= 88945.786 ~ 1,
+                                                         total_expenditure_peryear <= 128389.286 ~ 2,
+                                                         total_expenditure_peryear <= 189019.107 ~ 3,
+                                                         total_expenditure_peryear <= 4393472 ~ 4,
+                                                         TRUE ~ 0))
+
+quantile(Nutrition_2010$total_expenditure_peryear)
+Nutrition_2010 <- Nutrition_2010 %>% mutate(quantile=case_when(total_expenditure_peryear <= 71553.750 ~ 1,
+                                                         total_expenditure_peryear <= 104586.250 ~ 2,
+                                                         total_expenditure_peryear <= 157657.964 ~ 3,
+                                                         total_expenditure_peryear <= 1831450 ~ 4,
+                                                         TRUE ~ 0))
+
+quantile(Nutrition_2005$total_expenditure_peryear)
+Nutrition_2005 <- Nutrition_2005 %>% mutate(quantile=case_when(total_expenditure_peryear <= 36377.554 ~ 1,
+                                                         total_expenditure_peryear <= 54292.839 ~ 2,
+                                                         total_expenditure_peryear <= 84909.509 ~ 3,
+                                                         total_expenditure_peryear <= 1492484 ~ 4,
+                                                         TRUE ~ 0))
+
+quantile(Nutrition_2000$total_expenditure_peryear)
+Nutrition_2000 <- Nutrition_2000 %>% mutate(quantile=case_when(total_expenditure_peryear <= 24807.223 ~ 1,
+                                                         total_expenditure_peryear <= 36080.500 ~ 2,
+                                                         total_expenditure_peryear <= 52825.082 ~ 3,
+                                                         total_expenditure_peryear <= 361534 ~ 4,
+                                                         TRUE ~ 0))
+```
+
+
+## Subset quantile 1 and 4
+
+```{r}
+Nutrition_2016_1 <- subset(Nutrition_2016, Nutrition_2016$quantile==1)
+Nutrition_2010_1 <- subset(Nutrition_2010, Nutrition_2010$quantile==1)
+Nutrition_2005_1 <- subset(Nutrition_2005, Nutrition_2005$quantile==1)
+Nutrition_2000_1 <- subset(Nutrition_2000, Nutrition_2000$quantile==1)
+
+Nutrition_2016_4 <- subset(Nutrition_2016, Nutrition_2016$quantile==4)
+Nutrition_2010_4 <- subset(Nutrition_2010, Nutrition_2010$quantile==4)
+Nutrition_2005_4 <- subset(Nutrition_2005, Nutrition_2005$quantile==4)
+Nutrition_2000_4 <- subset(Nutrition_2000, Nutrition_2000$quantile==4)
+
+rm(temp_2000, temp_2005, temp_2010, temp_2016)
+```
+
+
 
 
 ## Calculating Nutrition Intake (Energy Protein: Energy, Protein, Fat, Moisture, Ash)
@@ -294,7 +346,7 @@ shrimp_protein <- ((17.6+15.7)/2)*10
 ```
 
 
-## Making new nutrition columns
+## Making new nutrition columns at National level
 
 ```{r}
 # Energy columns 
@@ -359,18 +411,171 @@ Nutrition_2000$`pro_puti/big_puti/tilapia` <- Nutrition_2000$`puti/big_puti/tila
 Nutrition_2000$pro_shrimp <- Nutrition_2000$shrimp * shrimp_protein
 ```
 
+
+## Making new nutrition columns at Poorest quantile
+
+```{r}
+# Energy columns 
+
+Nutrition_2016_1$eng_hilsa <- Nutrition_2016_1$hilsa * hilsa_energy
+Nutrition_2016_1$`eng_rohu/katla/mrigel/kali_baush` <- Nutrition_2016_1$`rohu/katla/mrigel/kali_baush` * rohu_katla_mrigel_kali_baush_energy
+Nutrition_2016_1$eng_koi <- Nutrition_2016_1$koi * koi_energy
+Nutrition_2016_1$`eng_silver_carp/grass_carp/miror_carp` <- Nutrition_2016_1$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_energy
+Nutrition_2016_1$`eng_puti/big_puti/tilapia` <- Nutrition_2016_1$`puti/big_puti/tilapia` * puti_big_puti_tilapia_energy
+Nutrition_2016_1$eng_shrimp <- Nutrition_2016_1$shrimp * shrimp_energy
+
+Nutrition_2010_1$eng_hilsa <- Nutrition_2010_1$hilsa * hilsa_energy
+Nutrition_2010_1$`eng_rohu/katla/mrigel/kali_baush` <- Nutrition_2010_1$`rohu/katal/mrigel/kali_baush` * rohu_katla_mrigel_kali_baush_energy
+Nutrition_2010_1$eng_koi <- Nutrition_2010_1$koi * koi_energy
+Nutrition_2010_1$`eng_silver_carp/grass_carp/miror_carp` <- Nutrition_2010_1$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_energy
+Nutrition_2010_1$`eng_puti/big_puti/tilapia` <- Nutrition_2010_1$`puti/big_puti/tilapia` * puti_big_puti_tilapia_energy
+Nutrition_2010_1$eng_shrimp <- Nutrition_2010_1$shrimp * shrimp_energy
+
+Nutrition_2005_1$eng_hilsa <- Nutrition_2005_1$hilsa * hilsa_energy
+Nutrition_2005_1$`eng_rohu/katla/mrigel/kali_baush` <- Nutrition_2005_1$`rohu/katal/mrigel/kali_baush` * rohu_katla_mrigel_kali_baush_energy
+Nutrition_2005_1$eng_koi <- Nutrition_2005_1$koi * koi_energy
+Nutrition_2005_1$`eng_silver_carp/grass_carp/miror_carp` <- Nutrition_2005_1$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_energy
+Nutrition_2005_1$`eng_puti/big_puti/tilapia` <- Nutrition_2005_1$`puti/big_puti/tilapia` * puti_big_puti_tilapia_energy
+Nutrition_2005_1$eng_shrimp <- Nutrition_2005_1$shrimp * shrimp_energy
+
+Nutrition_2000_1$eng_hilsa <- Nutrition_2000_1$hilsa * hilsa_energy
+Nutrition_2000_1$`eng_rohu/katla/mrigel/kali_baush` <- Nutrition_2000_1$`rohu/katal/mrigel/kali_baush` * rohu_katla_mrigel_kali_baush_energy
+Nutrition_2000_1$eng_koi <- Nutrition_2000_1$koi * koi_energy
+Nutrition_2000_1$`eng_silver_carp/grass_carp/miror_carp` <- Nutrition_2000_1$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_energy
+Nutrition_2000_1$`eng_puti/big_puti/tilapia` <- Nutrition_2000_1$`puti/big_puti/tilapia` * puti_big_puti_tilapia_energy
+Nutrition_2000_1$eng_shrimp <- Nutrition_2000_1$shrimp * shrimp_energy
+
+
+# Protein Columns
+
+Nutrition_2016_1$pro_hilsa <- Nutrition_2016_1$hilsa * hilsa_protein
+Nutrition_2016_1$`pro_rohu/katla/mrigel/kali_baush` <- Nutrition_2016_1$`rohu/katla/mrigel/kali_baush` * rohu_katla_mrigel_kali_baush_protein
+Nutrition_2016_1$pro_koi <- Nutrition_2016_1$koi * koi_protein
+Nutrition_2016_1$`pro_silver_carp/grass_carp/miror_carp` <- Nutrition_2016_1$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_protein
+Nutrition_2016_1$`pro_puti/big_puti/tilapia` <- Nutrition_2016_1$`puti/big_puti/tilapia` * puti_big_puti_tilapia_protein
+Nutrition_2016_1$pro_shrimp <- Nutrition_2016_1$shrimp * shrimp_protein
+
+Nutrition_2010_1$pro_hilsa <- Nutrition_2010_1$hilsa * hilsa_protein
+Nutrition_2010_1$`pro_rohu/katla/mrigel/kali_baush` <- Nutrition_2010_1$`rohu/katal/mrigel/kali_baush` * rohu_katla_mrigel_kali_baush_protein
+Nutrition_2010_1$pro_koi <- Nutrition_2010_1$koi * koi_protein
+Nutrition_2010_1$`pro_silver_carp/grass_carp/miror_carp` <- Nutrition_2010_1$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_protein
+Nutrition_2010_1$`pro_puti/big_puti/tilapia` <- Nutrition_2010_1$`puti/big_puti/tilapia` * puti_big_puti_tilapia_protein
+Nutrition_2010_1$pro_shrimp <- Nutrition_2010_1$shrimp * shrimp_protein
+
+Nutrition_2005_1$pro_hilsa <- Nutrition_2005_1$hilsa * hilsa_protein
+Nutrition_2005_1$`pro_rohu/katla/mrigel/kali_baush` <- Nutrition_2005_1$`rohu/katal/mrigel/kali_baush` * rohu_katla_mrigel_kali_baush_protein
+Nutrition_2005_1$pro_koi <- Nutrition_2005_1$koi * koi_protein
+Nutrition_2005_1$`pro_silver_carp/grass_carp/miror_carp` <- Nutrition_2005_1$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_protein
+Nutrition_2005_1$`pro_puti/big_puti/tilapia` <- Nutrition_2005_1$`puti/big_puti/tilapia` * puti_big_puti_tilapia_protein
+Nutrition_2005_1$pro_shrimp <- Nutrition_2005_1$shrimp * shrimp_protein
+
+Nutrition_2000_1$pro_hilsa <- Nutrition_2000_1$hilsa * hilsa_protein
+Nutrition_2000_1$`pro_rohu/katla/mrigel/kali_baush` <- Nutrition_2000_1$`rohu/katal/mrigel/kali_baush` * rohu_katla_mrigel_kali_baush_protein
+Nutrition_2000_1$pro_koi <- Nutrition_2000_1$koi * koi_protein
+Nutrition_2000_1$`pro_silver_carp/grass_carp/miror_carp` <- Nutrition_2000_1$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_protein
+Nutrition_2000_1$`pro_puti/big_puti/tilapia` <- Nutrition_2000_1$`puti/big_puti/tilapia` * puti_big_puti_tilapia_protein
+Nutrition_2000_1$pro_shrimp <- Nutrition_2000_1$shrimp * shrimp_protein
+```
+
+
+
+## Making new nutrition columns at Richest quantile
+
+```{r}
+# Energy columns 
+
+Nutrition_2016_4$eng_hilsa <- Nutrition_2016_4$hilsa * hilsa_energy
+Nutrition_2016_4$`eng_rohu/katla/mrigel/kali_baush` <- Nutrition_2016_4$`rohu/katla/mrigel/kali_baush` * rohu_katla_mrigel_kali_baush_energy
+Nutrition_2016_4$eng_koi <- Nutrition_2016_4$koi * koi_energy
+Nutrition_2016_4$`eng_silver_carp/grass_carp/miror_carp` <- Nutrition_2016_4$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_energy
+Nutrition_2016_4$`eng_puti/big_puti/tilapia` <- Nutrition_2016_4$`puti/big_puti/tilapia` * puti_big_puti_tilapia_energy
+Nutrition_2016_4$eng_shrimp <- Nutrition_2016_4$shrimp * shrimp_energy
+
+Nutrition_2010_4$eng_hilsa <- Nutrition_2010_4$hilsa * hilsa_energy
+Nutrition_2010_4$`eng_rohu/katla/mrigel/kali_baush` <- Nutrition_2010_4$`rohu/katal/mrigel/kali_baush` * rohu_katla_mrigel_kali_baush_energy
+Nutrition_2010_4$eng_koi <- Nutrition_2010_4$koi * koi_energy
+Nutrition_2010_4$`eng_silver_carp/grass_carp/miror_carp` <- Nutrition_2010_4$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_energy
+Nutrition_2010_4$`eng_puti/big_puti/tilapia` <- Nutrition_2010_4$`puti/big_puti/tilapia` * puti_big_puti_tilapia_energy
+Nutrition_2010_4$eng_shrimp <- Nutrition_2010_4$shrimp * shrimp_energy
+
+Nutrition_2005_4$eng_hilsa <- Nutrition_2005_4$hilsa * hilsa_energy
+Nutrition_2005_4$`eng_rohu/katla/mrigel/kali_baush` <- Nutrition_2005_4$`rohu/katal/mrigel/kali_baush` * rohu_katla_mrigel_kali_baush_energy
+Nutrition_2005_4$eng_koi <- Nutrition_2005_4$koi * koi_energy
+Nutrition_2005_4$`eng_silver_carp/grass_carp/miror_carp` <- Nutrition_2005_4$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_energy
+Nutrition_2005_4$`eng_puti/big_puti/tilapia` <- Nutrition_2005_4$`puti/big_puti/tilapia` * puti_big_puti_tilapia_energy
+Nutrition_2005_4$eng_shrimp <- Nutrition_2005_4$shrimp * shrimp_energy
+
+Nutrition_2000_4$eng_hilsa <- Nutrition_2000_4$hilsa * hilsa_energy
+Nutrition_2000_4$`eng_rohu/katla/mrigel/kali_baush` <- Nutrition_2000_4$`rohu/katal/mrigel/kali_baush` * rohu_katla_mrigel_kali_baush_energy
+Nutrition_2000_4$eng_koi <- Nutrition_2000_4$koi * koi_energy
+Nutrition_2000_4$`eng_silver_carp/grass_carp/miror_carp` <- Nutrition_2000_4$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_energy
+Nutrition_2000_4$`eng_puti/big_puti/tilapia` <- Nutrition_2000_4$`puti/big_puti/tilapia` * puti_big_puti_tilapia_energy
+Nutrition_2000_4$eng_shrimp <- Nutrition_2000_4$shrimp * shrimp_energy
+
+
+# Protein Columns
+
+Nutrition_2016_4$pro_hilsa <- Nutrition_2016_4$hilsa * hilsa_protein
+Nutrition_2016_4$`pro_rohu/katla/mrigel/kali_baush` <- Nutrition_2016_4$`rohu/katla/mrigel/kali_baush` * rohu_katla_mrigel_kali_baush_protein
+Nutrition_2016_4$pro_koi <- Nutrition_2016_4$koi * koi_protein
+Nutrition_2016_4$`pro_silver_carp/grass_carp/miror_carp` <- Nutrition_2016_4$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_protein
+Nutrition_2016_4$`pro_puti/big_puti/tilapia` <- Nutrition_2016_4$`puti/big_puti/tilapia` * puti_big_puti_tilapia_protein
+Nutrition_2016_4$pro_shrimp <- Nutrition_2016_4$shrimp * shrimp_protein
+
+Nutrition_2010_4$pro_hilsa <- Nutrition_2010_4$hilsa * hilsa_protein
+Nutrition_2010_4$`pro_rohu/katla/mrigel/kali_baush` <- Nutrition_2010_4$`rohu/katal/mrigel/kali_baush` * rohu_katla_mrigel_kali_baush_protein
+Nutrition_2010_4$pro_koi <- Nutrition_2010_4$koi * koi_protein
+Nutrition_2010_4$`pro_silver_carp/grass_carp/miror_carp` <- Nutrition_2010_4$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_protein
+Nutrition_2010_4$`pro_puti/big_puti/tilapia` <- Nutrition_2010_4$`puti/big_puti/tilapia` * puti_big_puti_tilapia_protein
+Nutrition_2010_4$pro_shrimp <- Nutrition_2010_4$shrimp * shrimp_protein
+
+Nutrition_2005_4$pro_hilsa <- Nutrition_2005_4$hilsa * hilsa_protein
+Nutrition_2005_4$`pro_rohu/katla/mrigel/kali_baush` <- Nutrition_2005_4$`rohu/katal/mrigel/kali_baush` * rohu_katla_mrigel_kali_baush_protein
+Nutrition_2005_4$pro_koi <- Nutrition_2005_4$koi * koi_protein
+Nutrition_2005_4$`pro_silver_carp/grass_carp/miror_carp` <- Nutrition_2005_4$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_protein
+Nutrition_2005_4$`pro_puti/big_puti/tilapia` <- Nutrition_2005_4$`puti/big_puti/tilapia` * puti_big_puti_tilapia_protein
+Nutrition_2005_4$pro_shrimp <- Nutrition_2005_4$shrimp * shrimp_protein
+
+Nutrition_2000_4$pro_hilsa <- Nutrition_2000_4$hilsa * hilsa_protein
+Nutrition_2000_4$`pro_rohu/katla/mrigel/kali_baush` <- Nutrition_2000_4$`rohu/katal/mrigel/kali_baush` * rohu_katla_mrigel_kali_baush_protein
+Nutrition_2000_4$pro_koi <- Nutrition_2000_4$koi * koi_protein
+Nutrition_2000_4$`pro_silver_carp/grass_carp/miror_carp` <- Nutrition_2000_4$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_protein
+Nutrition_2000_4$`pro_puti/big_puti/tilapia` <- Nutrition_2000_4$`puti/big_puti/tilapia` * puti_big_puti_tilapia_protein
+Nutrition_2000_4$pro_shrimp <- Nutrition_2000_4$shrimp * shrimp_protein
+```
+
 ## filtering necessary variables
 
 ```{r}
-Nutrition_2016 <- Nutrition_2016[,-c(2:7)]
-Nutrition_2010 <- Nutrition_2010[,-c(2:7)]
-Nutrition_2005 <- Nutrition_2005[,-c(2:7)]
-Nutrition_2000 <- Nutrition_2000[,-c(2:7)]
+Nutrition_2016 <- Nutrition_2016[,-c(2:8)]
+Nutrition_2010 <- Nutrition_2010[,-c(2:8)]
+Nutrition_2005 <- Nutrition_2005[,-c(2:8)]
+Nutrition_2000 <- Nutrition_2000[,-c(2:8)]
 
 Nutrition_2016 <- na.omit(Nutrition_2016)
 Nutrition_2010 <- na.omit(Nutrition_2010)
 Nutrition_2005 <- na.omit(Nutrition_2005)
 Nutrition_2000 <- na.omit(Nutrition_2000)
+
+Nutrition_2016_1 <- Nutrition_2016_1[,-c(2:8)]
+Nutrition_2010_1 <- Nutrition_2010_1[,-c(2:8)]
+Nutrition_2005_1 <- Nutrition_2005_1[,-c(2:8)]
+Nutrition_2000_1 <- Nutrition_2000_1[,-c(2:8)]
+
+Nutrition_2016_1 <- na.omit(Nutrition_2016_1)
+Nutrition_2010_1 <- na.omit(Nutrition_2010_1)
+Nutrition_2005_1 <- na.omit(Nutrition_2005_1)
+Nutrition_2000_1 <- na.omit(Nutrition_2000_1)
+
+Nutrition_2016_4 <- Nutrition_2016_4[,-c(2:8)]
+Nutrition_2010_4 <- Nutrition_2010_4[,-c(2:8)]
+Nutrition_2005_4 <- Nutrition_2005_4[,-c(2:8)]
+Nutrition_2000_4 <- Nutrition_2000_4[,-c(2:8)]
+
+Nutrition_2016_4 <- na.omit(Nutrition_2016_4)
+Nutrition_2010_4 <- na.omit(Nutrition_2010_4)
+Nutrition_2005_4 <- na.omit(Nutrition_2005_4)
+Nutrition_2000_4 <- na.omit(Nutrition_2000_4)
 ```
 
 ## Getting the summery results 
@@ -381,14 +586,36 @@ mean_2010 <- colMeans(Nutrition_2010)
 mean_2005 <- colMeans(Nutrition_2005)
 mean_2000 <- colMeans(Nutrition_2000)
 
+mean_2016_1 <- colMeans(Nutrition_2016_1)
+mean_2010_1 <- colMeans(Nutrition_2010_1)
+mean_2005_1 <- colMeans(Nutrition_2005_1)
+mean_2000_1 <- colMeans(Nutrition_2000_1)
+
+mean_2016_4 <- colMeans(Nutrition_2016_4)
+mean_2010_4 <- colMeans(Nutrition_2010_4)
+mean_2005_4 <- colMeans(Nutrition_2005_4)
+mean_2000_4 <- colMeans(Nutrition_2000_4)
+
 mean_data <- data.frame(mean_2000, mean_2005, mean_2010, mean_2016)
 mean_data <- mean_data[-1,]
 
+mean_data_1 <- data.frame(mean_2000_1, mean_2005_1, mean_2010_1, mean_2016_1)
+mean_data_1 <- mean_data_1[-c(1,2),]
+
+mean_data_4 <- data.frame(mean_2000_4, mean_2005_4, mean_2010_4, mean_2016_4)
+mean_data_4 <- mean_data_4[-c(1,2),]
+
+
 colnames(mean_data) <- c("2000", "2005", "2010", "2016")
+colnames(mean_data_1) <- c("2000", "2005", "2010", "2016")
+colnames(mean_data_4) <- c("2000", "2005", "2010", "2016")
 
 # Nutrition intake per per gram
 
 mean_data <- mean_data %>% mutate(across(.cols = c("2000":"2016"), .fns = ~.x/1000)) # calculate tables from this dataset. 
+mean_data_1 <- mean_data_1 %>% mutate(across(.cols = c("2000":"2016"), .fns = ~.x/1000)) # calculate tables from this dataset.
+
+mean_data_4 <- mean_data_4 %>% mutate(across(.cols = c("2000":"2016"), .fns = ~.x/1000)) # calculate tables from this dataset
 ```
 
 
