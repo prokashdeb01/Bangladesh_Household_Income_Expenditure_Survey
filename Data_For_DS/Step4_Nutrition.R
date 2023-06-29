@@ -5,18 +5,18 @@
 
 # Library
 
-```{r}
+
 library(dplyr)
 library(haven)
 library(tidyverse)
 library(tidyr)
 library(readxl)
-```
+
 
 
 ## Upload HIES datasets
 
-```{r}
+
 HIES_2016 <- read_excel("C:/Users/proka/OneDrive - Auburn University/Auburn/Research/Collaboration/TxState_BAU/Compiled_Data/Compiled_Fish_Data/fish_HIES2016.xlsx")
 
 HIES_2010 <- read_excel("C:/Users/proka/OneDrive - Auburn University/Auburn/Research/Collaboration/TxState_BAU/Compiled_Data/Compiled_Fish_Data/fish_HIES2010.xlsx")
@@ -29,23 +29,23 @@ HIES_2000 <- read_excel("C:/Users/proka/OneDrive - Auburn University/Auburn/Rese
 ## Finding any infinite or NA values
 
 # a <- apply(HIES_2016, 2, function(x) any(is.na(x)|is.infinite(x)))
-```
+
 
 
 
 ## Upload AER (Adult Equivalent Ratio) datasets
 
-```{r}
+
 AER_2016 <- read_excel("AER_Data/AER_2016.xlsx")
 AER_2010 <- read_excel("AER_Data/AER_2010.xlsx")
 AER_2005 <- read_excel("AER_Data/AER_2005.xlsx")
 AER_2000 <- read_excel("AER_Data/AER_2000.xlsx")
-```
+
 
 
 ## Marging AER with HIES
 
-```{r}
+
 HIES_2016 <- HIES_2016 %>% merge(AER_2016, by="hhold")
 
 HIES_2010 <- rename(HIES_2010, hhold=hhid)
@@ -56,17 +56,17 @@ HIES_2005 <- HIES_2005 %>% merge(AER_2005, by="hhold")
 
 HIES_2000$hhold <- as.numeric(HIES_2000$hhold)
 HIES_2000 <- HIES_2000 %>% merge(AER_2000, by="hhold")
-```
 
 
-```{r}
+
+
 rm(AER_2000, AER_2005, AER_2010, AER_2016)
-```
+
 
 
 ## Adding Rural and Arban areas
 
-```{r}
+
 area_2016 <- read_dta("C:/Users/proka/OneDrive - Auburn University/TxState/RESEARCH/Data/HIES 2016/hh_sec_a.dta")
 area_2016 <- area_2016[,c(3,14)]
 area_2016$area <- ifelse(area_2016$ruc==1, "rural", "urban")
@@ -92,28 +92,28 @@ area_2000$hhold <- as.numeric(area_2000$HHOLD)
 area_2000 <- area_2000[,c(14, 9)]
 area_2000$area <- ifelse(area_2000$RMO==1, "rural", "urban")
 area_2000 <- area_2000[,c(1,3)]
-```
+
 
 
 ## Merging the rural urban locaion to full dataframe
 
-```{r}
+
 HIES_2016 <- HIES_2016 %>% merge(area_2016, by="hhold")
 HIES_2010 <- HIES_2010 %>% merge(area_2010, by="hhold")
 HIES_2005 <- HIES_2005 %>% merge(area_2005, by="hhold")
 HIES_2000 <- HIES_2000 %>% merge(area_2000, by="hhold")
-```
 
-```{r}
+
+
 rm(area_2000, area_2005, area_2010, area_2016)
-```
+
 
 
 
 
 ## Cleaning the data: quantity
 
-```{r}
+
 HIES_2016 <- subset(HIES_2016, c(HIES_2016$`41_qnt`<15 & HIES_2016$`42_qnt`<20 & HIES_2016$`43_qnt`<20 &
                                    HIES_2016$`45_qnt`<5 & HIES_2016$`47_qnt`<10 & HIES_2016$`48_qnt`<10 &
                                    HIES_2016$`49_qnt`<20 & HIES_2016$`51_qnt`<10 & HIES_2016$`52_qnt`<10 & 
@@ -138,14 +138,14 @@ HIES_2000 <- subset(HIES_2000, c(HIES_2000$`48_qnt`<8 & HIES_2000$`49_qnt`<6 &
 
 
 #plot.ts(HIES_2016$`41_qnt`)
-```
+
 
 
 
 
 ## Converting Yearly data: consumption quantity, total food expenditure
 
-```{r}
+
 a <- 365/14
 
 temp_2016 <- HIES_2016[,-c(22:38)]
@@ -247,12 +247,12 @@ temp_2016 <- temp_2016 %>% merge(price_2016, by="hhold")
 temp_2010 <- temp_2010 %>% merge(price_2010, by="hhold")
 temp_2005 <- temp_2005 %>% merge(price_2005, by="hhold")
 temp_2000 <- temp_2000 %>% merge(price_2000, by="hhold")
-```
+
 
 
 ## Making dataframe for some selected species per capita consumption
 
-```{r}
+
 rm(HIES_2000, HIES_2005, HIES_2010, HIES_2016, price_2000, price_2005, price_2010, price_2016, a)
 
 Nutrition_2016 <- temp_2016[,c("hhold", "hilsa", "rohu/katla/mrigel/kali_baush", "koi",
@@ -270,12 +270,12 @@ Nutrition_2005 <- temp_2005[,c("hhold", "hilsa", "rohu/katal/mrigel/kali_baush",
 Nutrition_2000 <- temp_2000[,c("hhold", "hilsa", "rohu/katal/mrigel/kali_baush", "koi",
                                "silver_carp/grass_carp/miror_carp", "puti/big_puti/tilapia", 
                                "shrimp", "total_expenditure_peryear")]
-```
+
 
 
 ## Saperating into quantile
 
-```{r}
+
 quantile(Nutrition_2016$total_expenditure_peryear)
 Nutrition_2016 <- Nutrition_2016 %>% mutate(quantile=case_when(total_expenditure_peryear <= 88945.786 ~ 1,
                                                          total_expenditure_peryear <= 128389.286 ~ 2,
@@ -303,12 +303,12 @@ Nutrition_2000 <- Nutrition_2000 %>% mutate(quantile=case_when(total_expenditure
                                                          total_expenditure_peryear <= 52825.082 ~ 3,
                                                          total_expenditure_peryear <= 361534 ~ 4,
                                                          TRUE ~ 0))
-```
+
 
 
 ## Subset quantile 1 and 4
 
-```{r}
+
 Nutrition_2016_1 <- subset(Nutrition_2016, Nutrition_2016$quantile==1)
 Nutrition_2010_1 <- subset(Nutrition_2010, Nutrition_2010$quantile==1)
 Nutrition_2005_1 <- subset(Nutrition_2005, Nutrition_2005$quantile==1)
@@ -320,14 +320,14 @@ Nutrition_2005_4 <- subset(Nutrition_2005, Nutrition_2005$quantile==4)
 Nutrition_2000_4 <- subset(Nutrition_2000, Nutrition_2000$quantile==4)
 
 rm(temp_2000, temp_2005, temp_2010, temp_2016)
-```
+
 
 
 
 
 ## Calculating Nutrition Intake (Energy Protein: Energy, Protein, Fat, Moisture, Ash)
 
-```{r}
+
 # making variables on energy protein per kg
 
 hilsa_energy <- ((1020+618)/2)*10
@@ -343,12 +343,12 @@ koi_protein <- 155
 silver_carp_grass_carp_miror_carp_protein <- ((16.4+15.2+17.2)/3)*10
 puti_big_puti_tilapia_protein <- ((15.4+15.7+19.5)/3)*10
 shrimp_protein <- ((17.6+15.7)/2)*10
-```
+
 
 
 ## Making new nutrition columns at National level
 
-```{r}
+
 # Energy columns 
 
 Nutrition_2016$eng_hilsa <- Nutrition_2016$hilsa * hilsa_energy
@@ -409,12 +409,12 @@ Nutrition_2000$pro_koi <- Nutrition_2000$koi * koi_protein
 Nutrition_2000$`pro_silver_carp/grass_carp/miror_carp` <- Nutrition_2000$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_protein
 Nutrition_2000$`pro_puti/big_puti/tilapia` <- Nutrition_2000$`puti/big_puti/tilapia` * puti_big_puti_tilapia_protein
 Nutrition_2000$pro_shrimp <- Nutrition_2000$shrimp * shrimp_protein
-```
+
 
 
 ## Making new nutrition columns at Poorest quantile
 
-```{r}
+
 # Energy columns 
 
 Nutrition_2016_1$eng_hilsa <- Nutrition_2016_1$hilsa * hilsa_energy
@@ -475,13 +475,13 @@ Nutrition_2000_1$pro_koi <- Nutrition_2000_1$koi * koi_protein
 Nutrition_2000_1$`pro_silver_carp/grass_carp/miror_carp` <- Nutrition_2000_1$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_protein
 Nutrition_2000_1$`pro_puti/big_puti/tilapia` <- Nutrition_2000_1$`puti/big_puti/tilapia` * puti_big_puti_tilapia_protein
 Nutrition_2000_1$pro_shrimp <- Nutrition_2000_1$shrimp * shrimp_protein
-```
+
 
 
 
 ## Making new nutrition columns at Richest quantile
 
-```{r}
+
 # Energy columns 
 
 Nutrition_2016_4$eng_hilsa <- Nutrition_2016_4$hilsa * hilsa_energy
@@ -542,11 +542,11 @@ Nutrition_2000_4$pro_koi <- Nutrition_2000_4$koi * koi_protein
 Nutrition_2000_4$`pro_silver_carp/grass_carp/miror_carp` <- Nutrition_2000_4$`silver_carp/grass_carp/miror_carp` * silver_carp_grass_carp_miror_carp_protein
 Nutrition_2000_4$`pro_puti/big_puti/tilapia` <- Nutrition_2000_4$`puti/big_puti/tilapia` * puti_big_puti_tilapia_protein
 Nutrition_2000_4$pro_shrimp <- Nutrition_2000_4$shrimp * shrimp_protein
-```
+
 
 ## filtering necessary variables
 
-```{r}
+
 Nutrition_2016 <- Nutrition_2016[,-c(2:8)]
 Nutrition_2010 <- Nutrition_2010[,-c(2:8)]
 Nutrition_2005 <- Nutrition_2005[,-c(2:8)]
@@ -576,11 +576,11 @@ Nutrition_2016_4 <- na.omit(Nutrition_2016_4)
 Nutrition_2010_4 <- na.omit(Nutrition_2010_4)
 Nutrition_2005_4 <- na.omit(Nutrition_2005_4)
 Nutrition_2000_4 <- na.omit(Nutrition_2000_4)
-```
+
 
 ## Getting the summery results 
 
-```{r}
+
 mean_2016 <- colMeans(Nutrition_2016)
 mean_2010 <- colMeans(Nutrition_2010)
 mean_2005 <- colMeans(Nutrition_2005)
@@ -616,13 +616,13 @@ mean_data <- mean_data %>% mutate(across(.cols = c("2000":"2016"), .fns = ~.x/10
 mean_data_1 <- mean_data_1 %>% mutate(across(.cols = c("2000":"2016"), .fns = ~.x/1000)) # calculate tables from this dataset.
 
 mean_data_4 <- mean_data_4 %>% mutate(across(.cols = c("2000":"2016"), .fns = ~.x/1000)) # calculate tables from this dataset
-```
+
 
 
 
 ## Ploting the Nutrition garphs
 
-```{r}
+
 mean_data <- as.data.frame(t(mean_data))
 
 mean_data <- mean_data %>% mutate(across(.cols = c("eng_hilsa":"pro_shrimp"), .fns = ~log(.x)))
@@ -642,7 +642,7 @@ energy_plot <- ggplot()+
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
 
 energy_plot
-```
+
 
 
 

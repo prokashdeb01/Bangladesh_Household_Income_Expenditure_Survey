@@ -5,18 +5,18 @@
 
 # Library
 
-```{r}
+
 library(dplyr)
 library(haven)
 library(tidyverse)
 library(tidyr)
 library(readxl)
-```
+
 
 
 ## Upload HIES datasets
 
-```{r}
+
 HIES_2016 <- read_excel("C:/Users/proka/OneDrive - Auburn University/Auburn/Research/Collaboration/TxState_BAU/Compiled_Data/Compiled_Fish_Data/fish_HIES2016.xlsx")
 
 HIES_2010 <- read_excel("C:/Users/proka/OneDrive - Auburn University/Auburn/Research/Collaboration/TxState_BAU/Compiled_Data/Compiled_Fish_Data/fish_HIES2010.xlsx")
@@ -29,23 +29,23 @@ HIES_2000 <- read_excel("C:/Users/proka/OneDrive - Auburn University/Auburn/Rese
 ## Finding any infinite or NA values
 
 # a <- apply(HIES_2016, 2, function(x) any(is.na(x)|is.infinite(x)))
-```
+
 
 
 
 ## Upload AER (Adult Equivalent Ratio) datasets
 
-```{r}
+
 AER_2016 <- read_excel("AER_Data/AER_2016.xlsx")
 AER_2010 <- read_excel("AER_Data/AER_2010.xlsx")
 AER_2005 <- read_excel("AER_Data/AER_2005.xlsx")
 AER_2000 <- read_excel("AER_Data/AER_2000.xlsx")
-```
+
 
 
 ## Marging AER with HIES
 
-```{r}
+
 HIES_2016 <- HIES_2016 %>% merge(AER_2016, by="hhold")
 
 HIES_2010 <- rename(HIES_2010, hhold=hhid)
@@ -56,17 +56,17 @@ HIES_2005 <- HIES_2005 %>% merge(AER_2005, by="hhold")
 
 HIES_2000$hhold <- as.numeric(HIES_2000$hhold)
 HIES_2000 <- HIES_2000 %>% merge(AER_2000, by="hhold")
-```
 
 
-```{r}
+
+
 rm(AER_2000, AER_2005, AER_2010, AER_2016)
-```
+
 
 
 ## Adding Rural and Arban areas
 
-```{r}
+
 area_2016 <- read_dta("C:/Users/proka/OneDrive - Auburn University/TxState/RESEARCH/Data/HIES 2016/hh_sec_a.dta")
 area_2016 <- area_2016[,c(3,14)]
 area_2016$area <- ifelse(area_2016$ruc==1, "rural", "urban")
@@ -92,28 +92,28 @@ area_2000$hhold <- as.numeric(area_2000$HHOLD)
 area_2000 <- area_2000[,c(14, 9)]
 area_2000$area <- ifelse(area_2000$RMO==1, "rural", "urban")
 area_2000 <- area_2000[,c(1,3)]
-```
+
 
 
 ## Merging the rural urban locaion to full dataframe
 
-```{r}
+
 HIES_2016 <- HIES_2016 %>% merge(area_2016, by="hhold")
 HIES_2010 <- HIES_2010 %>% merge(area_2010, by="hhold")
 HIES_2005 <- HIES_2005 %>% merge(area_2005, by="hhold")
 HIES_2000 <- HIES_2000 %>% merge(area_2000, by="hhold")
-```
 
-```{r}
+
+
 rm(area_2000, area_2005, area_2010, area_2016)
-```
+
 
 
 
 
 ## Cleaning the data: quantity
 
-```{r}
+
 HIES_2016 <- subset(HIES_2016, c(HIES_2016$`41_qnt`<15 & HIES_2016$`42_qnt`<20 & HIES_2016$`43_qnt`<20 &
                                    HIES_2016$`45_qnt`<5 & HIES_2016$`47_qnt`<10 & HIES_2016$`48_qnt`<10 &
                                    HIES_2016$`49_qnt`<20 & HIES_2016$`51_qnt`<10 & HIES_2016$`52_qnt`<10 & 
@@ -138,14 +138,14 @@ HIES_2000 <- subset(HIES_2000, c(HIES_2000$`48_qnt`<8 & HIES_2000$`49_qnt`<6 &
 
 
 plot.ts(HIES_2016$`41_qnt`)
-```
+
 
 
 
 
 ## Converting Yearly data: consumption quantity, total food expenditure
 
-```{r}
+
 a <- 365/14
 
 temp_2016 <- HIES_2016[,-c(22:38)]
@@ -322,12 +322,12 @@ urban_2016 <- urban_2016 %>% mutate(quantile=case_when(total_expenditure_peryear
                                                          total_expenditure_peryear <= 229610.27 ~ 3,
                                                          total_expenditure_peryear <= 4393472  ~ 4,
                                                          TRUE ~ 0))
-```
+
 
 
 ## Exporting the compiled dataset
 
-```{r}
+
 write.csv(rural_2000, file = "HIES_2000_Rural.csv", row.names = F)
 write.csv(rural_2005, file = "HIES_2005_Rural.csv", row.names = F)
 write.csv(rural_2010, file = "HIES_2010_Rural.csv", row.names = F)
@@ -337,7 +337,7 @@ write.csv(urban_2000, file = "HIES_2000_Urban.csv", row.names = F)
 write.csv(urban_2005, file = "HIES_2005_Urban.csv", row.names = F)
 write.csv(urban_2010, file = "HIES_2010_Urban.csv", row.names = F)
 write.csv(urban_2016, file = "HIES_2016_Urban.csv", row.names = F)
-```
+
 
 
 
